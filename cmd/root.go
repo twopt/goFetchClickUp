@@ -1,75 +1,62 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
-	"github.com/fantasticrabbit/ClickupCLI/internal"
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
 )
 
 var (
 	cfgFile string
-	home, _ = os.UserHomeDir()
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cucli",
+	Use:   "clickup",
 	Short: "ClickupCLI allows access to ClickUp from the command line",
 	Long: `ClickupCLI allows you to use data from Clickup to drive scripts,
 	build tools, and send and receive data from your Clickup space.`,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("confirm auth status before calling")
-	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.clickup.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "specify a config file")
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in config file and available ENV variables
 func initConfig() {
+	var (
+		home, _     = os.UserHomeDir()
+		config_path = filepath.Join(home, ".clickup")
+		config_file = filepath.Join(home, ".clickup", "config.yaml")
+	)
+
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Search config in home/.config directory with name "clickup.yaml" (without extension).
-		viper.AddConfigPath(home + "/.config/clickup/")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("clickup")
-
+		_, err := os.Stat(config_path)
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(config_path, 0755)
+			if err != nil {
+				log.Fatalf("cannot create %s: %v", config_path, err)
+			}
+		}
+		viper.SetConfigFile(config_file)
 	}
 
-	viper.SetEnvPrefix("clickup")
+	viper.SetEnvPrefix("CLICKUP")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 		viper.ReadInConfig()
-	} else {
-
-		tok, err := internal.GetCUToken(viper.GetString("client_id"), viper.GetString("client_secret"), "4321")
-		if err == nil {
-			fmt.Println("auth succeeded")
-		}
-		viper.Set("cToken", tok)
-		viper.WriteConfigAs(home + "/.config/clickup/clickup.yaml")
 	}
+
+	viper.SetDefault("port", "4321")
 }

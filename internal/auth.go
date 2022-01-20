@@ -7,20 +7,49 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/fantasticrabbit/ClickupCLI/utils"
 	"github.com/pkg/browser"
+	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 )
 
-func GetCUToken(clientID, clientSecret, localHostPort string) (string, error) {
+const (
+	ProdAPIbase   = "https://app.clickup.com/api"
+	ProdAPIbaseV2 = "https://app.clickup.com/api/v2"
+)
+
+// CheckTokenExists returns True if a user auth token is availalble, otherwise false
+func CheckTokenExists() bool {
+	return viper.InConfig("token") || viper.GetString("token") != ""
+}
+
+// SaveToken saves the API Access Token to the config file for re-use
+func SaveToken(token string) {
+	viper.Set("token", token)
+	viper.WriteConfigAs(utils.GetConfigPath())
+}
+
+// GetToken retrieves client ID, client secret, and localhost port, and implements
+// webserver to allow end-user to authenticate, returning authorization token
+func GetToken() string {
+	// Check for required config keys:
+	if !(viper.IsSet("client_id")) {
+		log.Fatalln("No Client ID provided, check configuration")
+	}
+	if !(viper.IsSet("client_secret")) {
+		log.Fatalln("No Client Secret provided, check configuration")
+	}
+
 	ctx := context.Background()
-	redirectURL := "http://localhost:" + localHostPort
+	redirectURL := "http://localhost:" + viper.GetString("port")
+
 	conf := &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
+		ClientID:     viper.GetString("client_id"),
+		ClientSecret: viper.GetString("client_secret"),
 		RedirectURL:  redirectURL,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://app.clickup.com/api",
-			TokenURL: "https://app.clickup.com/api/v2/oauth/token",
+			AuthURL:  ProdAPIbase,
+			TokenURL: ProdAPIbaseV2 + "/oauth/token",
 		},
 	}
 
@@ -45,16 +74,16 @@ func GetCUToken(clientID, clientSecret, localHostPort string) (string, error) {
 
 	// open user's browser to login page
 	if err := browser.OpenURL(authPath); err != nil {
-		panic(fmt.Errorf("failed to open browser for authentication %s", err.Error()))
+		log.Fatalln("failed to open browser for authentication", err)
 	}
 
-	server := &http.Server{Addr: ":" + localHostPort}
+	server := &http.Server{Addr: ":" + viper.GetString("port")}
 
 	go func() {
 		okToClose := <-messages
 		if okToClose {
 			if err := server.Shutdown(context.Background()); err != nil {
-				log.Println("Failed to shutdown server", err)
+				log.Fatalln("Failed to shutdown server", err)
 			}
 		}
 	}()
@@ -63,9 +92,9 @@ func GetCUToken(clientID, clientSecret, localHostPort string) (string, error) {
 
 	tok, err := conf.Exchange(ctx, code)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
-	return tok.AccessToken, err
+	return tok.AccessToken
 
 }
