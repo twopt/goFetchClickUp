@@ -3,7 +3,7 @@ PREFIX?=$(shell pwd)
 
 # Setup name variables for the package/tool
 NAME := clickup
-PKG := github.com/fantasticrabbit/ClickupCLI
+PKG := github.com/twopt/clickup
 
 # Set any default go build tags
 BUILDTAGS :=

@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fantasticrabbit/ClickupCLI/utils"
 	"github.com/spf13/viper"
+	"github.com/twopt/clickup/utils"
 )
 
 //Requester interface needs an API path to request JSON data

@@ -7,9 +7,9 @@ import (
 	"math/rand"
 	"net/http"
 
-	"github.com/fantasticrabbit/ClickupCLI/utils"
 	"github.com/pkg/browser"
 	"github.com/spf13/viper"
+	"github.com/twopt/clickup/utils"
 	"golang.org/x/oauth2"
 )
 

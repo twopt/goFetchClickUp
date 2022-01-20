@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/fantasticrabbit/ClickupCLI/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/twopt/clickup/mocks"
 )
 
 const testAPIbaseV2 = "https://localhost/api/v2"

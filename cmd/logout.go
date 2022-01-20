@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/fantasticrabbit/ClickupCLI/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/twopt/clickup/utils"
 )
 
 var logoutCmd = &cobra.Command{
