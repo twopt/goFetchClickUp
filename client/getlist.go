@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/fantasticrabbit/ClickupCLI/internal"
+	"github.com/twopt/clickup/internal"
 )
 
 type ListRequest struct {

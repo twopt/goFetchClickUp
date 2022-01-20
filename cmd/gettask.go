@@ -3,10 +3,10 @@ package cmd
 import (
 	"strings"
 
-	"github.com/fantasticrabbit/ClickupCLI/client"
-	"github.com/fantasticrabbit/ClickupCLI/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/twopt/clickup/client"
+	"github.com/twopt/clickup/internal"
 )
 
 var taskCmd = &cobra.Command{

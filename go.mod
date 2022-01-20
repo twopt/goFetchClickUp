@@ -1,4 +1,4 @@
-module github.com/fantasticrabbit/ClickupCLI
+module github.com/twopt/clickup
 
 go 1.17
 
