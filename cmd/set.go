@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -27,7 +28,10 @@ var setCmd = &cobra.Command{
 			value, _ := cmd.Flags().GetString(flag)
 			if value != "" {
 				viper.BindPFlag(flag, cmd.Flags().Lookup(flag))
-				viper.WriteConfigAs(utils.GetConfigFile())
+				err := viper.WriteConfigAs(utils.GetConfigFile())
+				if err != nil {
+					log.Fatalf("cannot write config to %s: %v", utils.GetConfigFile(), err)
+				}
 				fmt.Printf("Saved %s to %s\n", flag, utils.GetConfigFile())
 			}
 		}
