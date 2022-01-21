@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -15,7 +16,10 @@ var logoutCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("deleted authentication token")
 		viper.Set("token", "")
-		viper.WriteConfigAs(utils.GetConfigFile())
+		err := viper.WriteConfigAs(utils.GetConfigFile())
+		if err != nil {
+			log.Fatalf("cannot write config to %s: %v", utils.GetConfigFile(), err)
+		}
 	},
 }
 

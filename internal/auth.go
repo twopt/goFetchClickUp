@@ -26,7 +26,10 @@ func CheckTokenExists() bool {
 // SaveToken saves the API Access Token to the config file for re-use
 func SaveToken(token string) {
 	viper.Set("token", token)
-	viper.WriteConfigAs(utils.GetConfigFile())
+	err := viper.WriteConfigAs(utils.GetConfigFile())
+	if err != nil {
+		log.Fatalf("cannot write config to %s: %v", utils.GetConfigFile(), err)
+	}
 }
 
 // GetToken retrieves client ID, client secret, and localhost port, and implements
